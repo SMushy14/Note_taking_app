@@ -15,11 +15,13 @@ class NotesScreen extends StatefulWidget {
 
 class _NotesScreenState extends State<NotesScreen> {
   late final NotesCubit notesCubit;
+  late final AuthCubit authCubit;
 
   @override
   void initState() {
     super.initState();
     notesCubit = context.read<NotesCubit>();
+    authCubit = context.read<AuthCubit>();
     notesCubit.fetchNotes(widget.user.uid);
   }
 
@@ -32,7 +34,7 @@ class _NotesScreenState extends State<NotesScreen> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              context.read<AuthCubit>().logout();
+              authCubit.logout();
             },
           ),
         ],
@@ -66,14 +68,19 @@ class _NotesScreenState extends State<NotesScreen> {
               itemBuilder: (context, index) {
                 final note = state.notes[index];
                 return Card(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   elevation: 4,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: ListTile(
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     title: Text(note['text']),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -82,28 +89,31 @@ class _NotesScreenState extends State<NotesScreen> {
                           icon: const Icon(Icons.edit),
                           onPressed: () => showDialog(
                             context: context,
-                            builder: (_) =>
-                                AddEditNoteDialog(user: widget.user, existingNote: note),
+                            builder: (_) => AddEditNoteDialog(
+                              user: widget.user,
+                              existingNote: note,
+                            ),
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.delete),
+                          icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () async {
                             final confirmed = await showDialog<bool>(
                               context: context,
-                              builder: (context) => AlertDialog(
+                              builder: (dialogCtx) => AlertDialog(
                                 title: const Text('Confirm delete'),
                                 content: const Text(
-                                    'Are you sure you want to delete this note?'),
+                                  'Are you sure you want to delete this note?',
+                                ),
                                 actions: [
                                   TextButton(
                                     onPressed: () =>
-                                        Navigator.of(context).pop(false),
+                                        Navigator.of(dialogCtx).pop(false),
                                     child: const Text('Cancel'),
                                   ),
                                   TextButton(
                                     onPressed: () =>
-                                        Navigator.of(context).pop(true),
+                                        Navigator.of(dialogCtx).pop(true),
                                     child: const Text(
                                       'Delete',
                                       style: TextStyle(color: Colors.red),
