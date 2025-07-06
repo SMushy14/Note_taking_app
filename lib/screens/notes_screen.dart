@@ -118,7 +118,6 @@ class _NotesScreenState extends State<NotesScreen> {
                           IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
                             onPressed: () async {
-                              // Capture navigator and scaffoldMessenger before async calls
                               final scaffoldMessenger = ScaffoldMessenger.of(
                                 context,
                               );
@@ -135,13 +134,13 @@ class _NotesScreenState extends State<NotesScreen> {
                                     TextButton(
                                       onPressed: () => navigator.pop(
                                         false,
-                                      ), // use captured navigator here
+                                      ),
                                       child: const Text('Cancel'),
                                     ),
                                     TextButton(
                                       onPressed: () => navigator.pop(
                                         true,
-                                      ), // use captured navigator here
+                                      ),
                                       child: const Text(
                                         'Delete',
                                         style: TextStyle(color: Colors.red),
