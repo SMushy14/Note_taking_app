@@ -44,7 +44,7 @@ class _NotesScreenState extends State<NotesScreen> {
             IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () {
-                authCubit.logout();
+                context.read<AuthCubit>().logout();
               },
             ),
           ],
