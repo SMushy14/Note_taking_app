@@ -2,7 +2,7 @@
 
 For this assignment, you will implement a 3-4 screen mini-app for taking notes.  First, implement a signup and login screen that integrates Firebase authentication with an email + password flow: a simple login screen that calls createUserWithEmailAndPassword for new users and signInWithEmailAndPassword for returning users, then routes to the main interface, which is displayed below.
 
-                                                                                                                               Screenshot 2025-06-23 at 10.39.57.png
+![My App Screenshot](lib\images\Screenshot 2025-07-06 220737.png "Screenshot of the app")
 
 (If the list is empty(No note has been added yet.), display the centered hint “Nothing here yet—tap ➕ to add a note.”). Every new user who has not added any note yet should see this.
 
