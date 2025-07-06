@@ -44,7 +44,7 @@ class _NotesScreenState extends State<NotesScreen> {
             IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () {
-                context.read<AuthCubit>().logout();
+                authCubit.logout();
               },
             ),
           ],
@@ -53,10 +53,20 @@ class _NotesScreenState extends State<NotesScreen> {
           child: BlocConsumer<NotesCubit, NotesState>(
             listener: (context, state) {
               if (state.error != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                scaffoldMessenger.showSnackBar(
                   SnackBar(
                     content: Text(state.error!),
                     backgroundColor: Colors.red,
+                  ),
+                );
+              }
+              if (state.successMessage != null) {
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(
+                    content: Text(state.successMessage!),
+                    backgroundColor: Colors.green,
                   ),
                 );
               }
@@ -108,6 +118,12 @@ class _NotesScreenState extends State<NotesScreen> {
                           IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
                             onPressed: () async {
+                              // Capture navigator and scaffoldMessenger before async calls
+                              final scaffoldMessenger = ScaffoldMessenger.of(
+                                context,
+                              );
+                              final navigator = Navigator.of(context);
+
                               final confirmed = await showDialog<bool>(
                                 context: context,
                                 builder: (dialogCtx) => AlertDialog(
@@ -117,13 +133,15 @@ class _NotesScreenState extends State<NotesScreen> {
                                   ),
                                   actions: [
                                     TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(dialogCtx).pop(false),
+                                      onPressed: () => navigator.pop(
+                                        false,
+                                      ), // use captured navigator here
                                       child: const Text('Cancel'),
                                     ),
                                     TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(dialogCtx).pop(true),
+                                      onPressed: () => navigator.pop(
+                                        true,
+                                      ), // use captured navigator here
                                       child: const Text(
                                         'Delete',
                                         style: TextStyle(color: Colors.red),
@@ -132,19 +150,22 @@ class _NotesScreenState extends State<NotesScreen> {
                                   ],
                                 ),
                               );
-                              if (confirmed == true) {
-                                await notesCubit.deleteNote(
-                                  note['id'],
-                                  widget.user.uid,
-                                );
-                                if (!mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Note deleted successfully"),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
-                              }
+
+                              if (confirmed != true) return;
+
+                              await notesCubit.deleteNote(
+                                note['id'],
+                                widget.user.uid,
+                              );
+
+                              if (!mounted) return;
+
+                              scaffoldMessenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text("Note deleted successfully"),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
                             },
                           ),
                         ],
