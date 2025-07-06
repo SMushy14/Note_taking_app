@@ -1,3 +1,7 @@
+# ignore Firebase and environment files
+google-services.json
+.env
+*.keystore
 # Miscellaneous
 *.class
 *.log
