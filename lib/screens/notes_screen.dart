@@ -25,61 +25,112 @@ class NotesScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: BlocConsumer<NotesCubit, NotesState>(
-        listener: (context, state) {
-          if (state.error != null) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.error!)));
-          }
-        },
-        builder: (context, state) {
-          if (state.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (state.notes.isEmpty) {
-            return const Center(
-              child: Text("Nothing here yet—tap ➕ to add a note."),
-            );
-          }
-
-          return ListView.builder(
-            itemCount: state.notes.length,
-            itemBuilder: (context, index) {
-              final note = state.notes[index];
-              return ListTile(
-                title: Text(note['text']),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () => showDialog(
-                        context: context,
-                        builder: (_) =>
-                            AddEditNoteDialog(user: user, existingNote: note),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () async {
-                        await context.read<NotesCubit>().deleteNote(
-                          note['id'],
-                          user.uid,
-                        );
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Note deleted successfully")),
-                        );
-                      },
-                    ),
-                  ],
+      body: SafeArea(
+        child: BlocConsumer<NotesCubit, NotesState>(
+          listener: (context, state) {
+            if (state.error != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.error!),
+                  backgroundColor: Colors.red,
                 ),
               );
-            },
-          );
-        },
+            }
+          },
+          builder: (context, state) {
+            if (state.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (state.notes.isEmpty) {
+              return const Center(
+                child: Text("Nothing here yet—tap ➕ to add a note."),
+              );
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              itemCount: state.notes.length,
+              itemBuilder: (context, index) {
+                final note = state.notes[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    title: Text(note['text']),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () => showDialog(
+                            context: context,
+                            builder: (_) => AddEditNoteDialog(
+                              user: user,
+                              existingNote: note,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () async {
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Confirm delete'),
+                                content: const Text(
+                                  'Are you sure you want to delete this note?',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(true),
+                                    child: const Text(
+                                      'Delete',
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirmed == true) {
+                              await context.read<NotesCubit>().deleteNote(
+                                note['id'],
+                                user.uid,
+                              );
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Note deleted successfully"),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => showDialog(

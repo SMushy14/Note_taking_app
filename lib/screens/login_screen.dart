@@ -13,6 +13,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   bool isSignUp = false;
 
@@ -60,44 +61,67 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           body: Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                TextField(
-                  controller: emailController,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                TextField(
-                  controller: passwordController,
-                  decoration: const InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    final email = emailController.text.trim();
-                    final password = passwordController.text.trim();
-                    if (isSignUp) {
-                      context.read<AuthCubit>().signUp(email, password);
-                    } else {
-                      context.read<AuthCubit>().login(email, password);
-                    }
-                  },
-                  child: Text(isSignUp ? 'Sign Up' : 'Login'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      isSignUp = !isSignUp;
-                    });
-                  },
-                  child: Text(
-                    isSignUp
-                        ? 'Already have an account? Login'
-                        : 'Create an account',
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: emailController,
+                    decoration: const InputDecoration(labelText: 'Email'),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Email is required';
+                      }
+                      if (!value.contains('@')) {
+                        return 'Enter a valid email';
+                      }
+                      return null;
+                    },
                   ),
-                ),
-              ],
+                  TextFormField(
+                    controller: passwordController,
+                    decoration: const InputDecoration(labelText: 'Password'),
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Password is required';
+                      }
+                      if (value.length < 6) {
+                        return 'Password must be at least 6 characters';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        final email = emailController.text.trim();
+                        final password = passwordController.text.trim();
+                        if (isSignUp) {
+                          context.read<AuthCubit>().signUp(email, password);
+                        } else {
+                          context.read<AuthCubit>().login(email, password);
+                        }
+                      }
+                    },
+                    child: Text(isSignUp ? 'Sign Up' : 'Login'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        isSignUp = !isSignUp;
+                      });
+                    },
+                    child: Text(
+                      isSignUp
+                          ? 'Already have an account? Login'
+                          : 'Create an account',
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
